@@ -439,17 +439,24 @@ Handlebars.registerHelper('attachNames', function(items) {
 	        });
         });
 
-	this.get("#/about", function() {
+	this.get("#/page/:page", function() {
+            var page = this.params['page'];
             $('#premain').empty();
-	    $('#menu_about').addClass('active');
-            this.render('templates/main.mustache', {"contentId":"about"})
-                .replace("#main");
-	    this.load("/json/content?id=about", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
-                    checkLoggedIn();
-	        });
+	    $('#menu_' + page).addClass('active');
+	    this.load("/json/content?id=" + page, {"json":true})
+                .then(function(items) {
+                    if (items == null)
+                    {
+                        this.render('templates/main.mustache', {"contentId":page})
+                            .appendTo("#main");
+                    } else {
+		        this.render('templates/main.mustache',items)
+		            .replace('#main')
+		            .then(function () {
+                                checkLoggedIn();
+	                    });
+                    }
+                });
         });
 
         this.get("#/additem", function() {
