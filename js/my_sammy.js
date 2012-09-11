@@ -225,8 +225,8 @@ Handlebars.registerHelper('attachNames', function(items) {
 	    var id = this.params['id'];
             var context = this;
             $('#premain').empty();
-            this.render('templates/edit_content.mustache',{'contentId':id})
-		.replace('#main');
+
+            this.contentId = id;
             this.load("/json/rawcontent?id=" + id, {"json":true})
 		.then(function(items) {
 		    $("#main").fadeOut('fast', function() {
