@@ -238,8 +238,8 @@ Handlebars.registerHelper('attachNames', function(items) {
         });
 	this.post("#/editpage/:id", function() {
 	    $.post("/json/editcontent", this.params, function(response) {
-//             context.next(JSON.parse(response));
-           });
+                //             context.next(JSON.parse(response));
+            });
 	    this.redirect("#/");
 	});
 
@@ -672,17 +672,19 @@ Handlebars.registerHelper('attachNames', function(items) {
 
         this.bind('update-requests', function() {
             var context = this;
+            if (login.get('user')) {
             // Display categories
-            this.load('/json/newrequests', {"json":true})
-                .then(function(items) {
-                    var count = items.length;
-                    if (context.oldCount != count && count != 0) {
-                        $("#newRequestsAlert").show();
-                    }
-                    context.oldCount = count;
-                    $("#requestNumber").text(count);
-                    setTimeout(function() {context.trigger('update-requests');}, 5000);
-                });
+                this.load('/json/newrequests', {"json":true})
+                    .then(function(items) {
+                        var count = items.length;
+                        if (context.oldCount != count && count != 0) {
+                            $("#newRequestsAlert").show();
+                        }
+                        context.oldCount = count;
+                        $("#requestNumber").text(count);
+                        setTimeout(function() {context.trigger('update-requests');}, 50000);
+                    });
+            }
         });
 
 
