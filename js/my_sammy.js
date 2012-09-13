@@ -99,7 +99,6 @@ Handlebars.registerHelper('attachNames', function(items) {
 		if (data == "fail") {
 		    login.clear("user");
                 }
-	    });
             if (login.get('user')) {
                 $('#menu_login').hide();
                 $('#menu_user').show();
@@ -110,6 +109,8 @@ Handlebars.registerHelper('attachNames', function(items) {
                 $('#menu_user').hide();
                 $('.admin-only').hide();
             }
+
+	    });
 
         };
 
@@ -448,7 +449,11 @@ Handlebars.registerHelper('attachNames', function(items) {
                     if (items == null)
                     {
                         this.render('templates/main.mustache', {"contentId":page})
-                            .replace("#main");
+                            .replace("#main")
+		            .then(function () {
+                                checkLoggedIn();
+	                    });
+
                     } else {
 		        this.render('templates/main.mustache',items)
 		            .replace('#main')
@@ -457,6 +462,7 @@ Handlebars.registerHelper('attachNames', function(items) {
 	                    });
                     }
                 });
+
         });
 
         this.get("#/additem", function() {
@@ -634,6 +640,7 @@ Handlebars.registerHelper('attachNames', function(items) {
 
             var context = this;
             this.id = "main";
+            this.contentId = "main";
             this.render('templates/main.mustache', {"contentId":"main"})
                 .replace("#main");
 	    this.load("/json/content?id=main", {"json":true,})
