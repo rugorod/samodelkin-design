@@ -7,6 +7,15 @@ body {
     padding-top: 40px;
     background: #222 url(/img/bg.jpg);
 }
+/* cont for editible cont */
+.main-cont {
+    background: rgba( 255, 255, 255, 0.7);
+    padding: 10px;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
 /* page header */
 .page-header {
     background: rgba( 255, 255, 255, 0.7);
