@@ -115,6 +115,11 @@ body > .navbar-fixed-top .brand {
     height: 210px;
     margin: 10px auto;
 }
+.image-galery:hower {
+    overflow: auto;
+}
+
+
 .image-galery img {
     max-height: 100%;
     display:block;
