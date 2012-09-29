@@ -7,6 +7,24 @@ body {
     padding-top: 40px;
     background: #222 url(/img/bg.jpg);
 }
+/* cont for editible cont */
+.main-cont {
+    background: rgba( 255, 255, 255, 0.7);
+    padding: 10px;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+/* page header */
+.page-header {
+    background: rgba( 255, 255, 255, 0.7);
+    padding: 10px;
+    border: 1px solid #DDD;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
 /* item img */
 .hidden-img a:nth-child(n+2) {
     display: none;
@@ -97,6 +115,11 @@ body > .navbar-fixed-top .brand {
     height: 210px;
     margin: 10px auto;
 }
+.image-galery:hower {
+    overflow: auto;
+}
+
+
 .image-galery img {
     max-height: 100%;
     display:block;
