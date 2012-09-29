@@ -130,7 +130,7 @@ Handlebars.registerHelper('attachNames', function(items) {
                             cat = categories[i];
                         }
                     }
-                    this.load('/json/tagscategory?category=' + category, {"json":true})
+                    this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
                         .then(function(tags) {
                             context.render('/templates/category_content.mustache',
                                            {"catTitle":cat.catTitle,
@@ -141,7 +141,7 @@ Handlebars.registerHelper('attachNames', function(items) {
                                 .replace('#premain');
                         });
 
-	            this.load(link + '?category=' + category, {"json":true})
+	            this.load(link + '?category=' + encodeURIComponent(category), {"json":true})
 		        .then(function(items) {
 		            $("#main").fadeIn('fast', function() {
                                 context.renderEach('templates/item.mustache',items)
