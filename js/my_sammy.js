@@ -74,17 +74,6 @@ Handlebars.registerHelper('attachNames', function(items) {
 });
 
 
-        function newAlert() {
-            var oldTitle = document.title;
-            var msg = "Новый заказ!";
-            var timeoutId = setInterval(function() {
-                document.title = document.title == msg ? ' ' : msg;
-            }, 2000);
-            window.onmousemove = function() {
-                document.title = oldTitle;
-                window.onmousemove = null;
-            };
-        }
 
         var current_user = false;
 
@@ -268,6 +257,7 @@ Handlebars.registerHelper('attachNames', function(items) {
                 //history.back();
                 //context.next(JSON.parse(response));
             });
+            this.redirect("#/edit/" + id);
 	});
 
 	this.get("#/deletereq/:id", function() {
@@ -643,7 +633,7 @@ Handlebars.registerHelper('attachNames', function(items) {
             this.contentId = "main";
             this.render('templates/main.mustache', {"contentId":"main"})
                 .replace("#main");
-	    this.load("/json/content?id=main", {"json":true,})
+	    this.load("/json/content?id=main", {"json":true})
 		.render('templates/main.mustache')
 		.replace('#main')
 		.then(function () {
