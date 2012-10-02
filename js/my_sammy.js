@@ -18,6 +18,10 @@
 
 
 
+        this.bind('flash', function(e, message) {
+            $('#flashMsg').html(message);
+            $('#flash').fadeIn('slow').delay(5000).fadeOut('slow');
+        });
 
 
 // based on the `#each` helper, requires jQuery (for jQuery.extend)
@@ -202,7 +206,7 @@ Handlebars.registerHelper('attachNames', function(items) {
 	this.around(function(callback) {
 	    var context = this;
             app.clearTemplateCache();
-	    $(".alert").alert('close');
+//	    $(".alert").alert('close');
 	    $('.telephone').text("27-87-28");
 	    $('.nav li').removeClass('active');
 	    this.categories = cache.get("categories");
@@ -295,11 +299,22 @@ Handlebars.registerHelper('attachNames', function(items) {
 		});
         });
 
-	this.post("#/edit", function() {
+        this.post("/json/edit", function(){
+            var context = this;
 	    $.post("/json/edit", this.params, function(response) {
-//             context.next(JSON.parse(response));
-           });
-	    this.redirect("#/");
+                context.trigger('flash', "Запись обновлена...");
+                app.runRoute("get", "#/edit/" + context.params['id']);
+                //             context.next(JSON.parse(response));
+            });
+        });
+	this.post("#/edit", function() {
+            var context = this;
+	    $.post("/json/edit", this.params, function(response) {
+                context.trigger('flash', "Запись обновлена...");
+                app.runRoute("get", "#/edit/" + context.params['id']);
+                //             context.next(JSON.parse(response));
+            });
+//	    this.redirect("#/");
 	});
 
         this.get("#/edit_category/:id", function() {
@@ -462,15 +477,25 @@ Handlebars.registerHelper('attachNames', function(items) {
 		.replace('#main');
         });
 
-        this.post("#/additem", function() {
+        this.post("#/additem", function(){
             var context = this;
             var category = this.params.category;
-            $.post('/json/additem', this.params, function(data) {
-                // FIXME: добавить уведомление
-                alert(data);
-                context.redirect("#/category/" + category);
+	    $.post("/json/additem", this.params, function(response) {
+                context.trigger('flash', "Запись добавлена.");
+                app.runRoute("get", "#/category/" + category);
+                //             context.next(JSON.parse(response));
             });
         });
+	this.post("/json/additem", function() {
+            var context = this;
+            var category = this.params.category;
+	    $.post("/json/additem", this.params, function(response) {
+                context.trigger('flash', "Запись добавлена.");
+                app.runRoute("get", "#/category/" + category);
+                //             context.next(JSON.parse(response));
+            });
+//	    this.redirect("#/");
+	});
 
         this.get("#/feedbacks", function() {
             var context = this;
