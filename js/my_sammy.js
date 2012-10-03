@@ -136,28 +136,28 @@ Handlebars.registerHelper('attachNames', function(items) {
                     }
                     this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
                         .then(function(tags) {
-                            context.render('/templates/category_content.mustache',
-                                           {"catTitle":cat.catTitle,
-                                            "tags":tags,
-                                            "catId":cat.catId,
-                                            "catContent":cat.catContent,
-                                            "catName":category})
-                                .replace('#premain');
+	                    this.load(link + '?category=' + encodeURIComponent(category), {"json":true})
+		                .then(function(items) {
+		                    $("#main").fadeIn('fast', function() {
+                                        context.render('templates/category.mustache',
+                                                       {"items":items,
+                                                        "tags":tags,
+                                                        "catTitle":cat.catTitle,
+                                                        "tags":tags,
+                                                        "catId":cat.catId,
+                                                        "catContent":cat.catContent,
+                                                        "catName":category})
+			                    .replace('#main')
+			                    .then(function () {
+				                $("#main").fadeIn('fast');
+	                                        $('.nav li').removeClass('active');
+				                $('#cat_' + category).addClass('active');
+                                                checkLoggedIn();
+	                                    });
+		                    });
+	                        });
                         });
 
-	            this.load(link + '?category=' + encodeURIComponent(category), {"json":true})
-		        .then(function(items) {
-		            $("#main").fadeIn('fast', function() {
-                                context.renderEach('templates/item.mustache',items)
-			            .replace('#main')
-			            .then(function () {
-				        $("#main").fadeIn('fast');
-	                                $('.nav li').removeClass('active');
-				        $('#cat_' + category).addClass('active');
-                                        checkLoggedIn();
-	                            });
-		            });
-	                });
 	        });
         });
 
