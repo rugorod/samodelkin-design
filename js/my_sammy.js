@@ -167,40 +167,44 @@ Handlebars.registerHelper('attachNames', function(items) {
 	    var tag = this.params['tag'];
             var link = "/json/categorytag";
             if (this.params['sort']) {
-                link = "/json/categorytag"
-            }
-            var categories = cache.get("categories");
-            var cat = {};
-            for (i in categories) {
-                if (categories[i].catName == category) {
-                    cat = categories[i];
-                }
+                link = "/json/categorytag";
             }
             $('#main').empty();
-            this.load('/json/tagscategory?category=' + category, {"json":true})
-                .then(function(tags) {
-                    context.render('templates/category_content.mustache',
-                                   {"catTitle":cat.catTitle,
-                                    "tags":tags,
-                                    "catId":cat.catId,
-                                    "catContent":cat.catContent,
-                                    "catName":category})
-                        .replace('#premain');
-                });
+            $('#premain').empty();
+            this.load("/json/categories", {"json":true})
+		.then(function(categories) {
+                    var cat = {};
+                    for (i in categories) {
+                        if (categories[i].catName == category) {
+                            cat = categories[i];
+                        }
+                    }
+                    this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
+                        .then(function(tags) {
+	                    this.load(link + '?category=' + encodeURIComponent(category)
+                                      + "&tag=" + encodeURIComponent(tag), {"json":true})
+		                .then(function(items) {
+		                    $("#main").fadeIn('fast', function() {
+                                        context.render('templates/category.mustache',
+                                                       {"items":items,
+                                                        "tags":tags,
+                                                        "catTitle":cat.catTitle,
+                                                        "tags":tags,
+                                                        "catId":cat.catId,
+                                                        "catContent":cat.catContent,
+                                                        "catName":category})
+			                    .replace('#main')
+			                    .then(function () {
+				                $("#main").fadeIn('fast');
+	                                        $('.nav li').removeClass('active');
+				                $('#cat_' + category).addClass('active');
+                                                checkLoggedIn();
+	                                    });
+		                    });
+	                        });
+                        });
 
-	    this.load(link + '?category=' + category + "&tag=" + tag, {"json":true})
-		.then(function(items) {
-		    $("#main").fadeIn('fast', function() {
-                        context.renderEach('templates/item.mustache',items)
-			    .replace('#main')
-			    .then(function () {
-				$("#main").fadeIn('fast');
-	                        $('.nav li').removeClass('active');
-				$('#cat_' + category).addClass('active');
-                                checkLoggedIn();
-	                    });
-		    });
-	    });
+	        });
 	});
 
 	this.around(function(callback) {
