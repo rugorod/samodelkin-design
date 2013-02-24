@@ -16,6 +16,7 @@
     <script src="js/sammy.storage.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/sammy.json.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/sammy.push_location_proxy.js" type="text/javascript" charset="utf-8"></script>
+    <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
     <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/my_sammy.js" type="text/javascript" charset="utf-8"></script>
     <script src="http://malsup.github.com/jquery.form.js"></script>
@@ -60,27 +61,27 @@
 	  <div class="nav-collapse collapse">
 	    <ul class="nav">
 	      <li id="menu_main">
-		<a href="#">
+		<a href="#!/">
 		  Главная
 		</a>
 	      </li>
 	      <li id="menu_about">
-		<a href="#/page/about">
+		<a href="#!/page/about">
 		  О компании
 		</a>
 	      </li>
 	      <li id="menu_contacts">
-		<a href="#/page/contacts">
+		<a href="#!/page/contacts">
 		  Контакты
 		</a>
 	      </li>
 	      <li id="menu_discount">
-		<a href="#/page/discount">
+		<a href="#!/page/discount">
 		  Акции
 		</a>
 	      </li>
 	      <li id="menu_address">
-		<a href="#/page/address">
+		<a href="#!/page/address">
 		  Схема проезда
 		</a>
 	      </li>
@@ -146,6 +147,7 @@
 	    </div>
 	    <div class="row-fluid">
 	      <ul class="thumbnails" id="main">
+            {{main}}
 	      </ul>
 	    </div>
 	  </section>
@@ -172,5 +174,6 @@
 	  </div>
 	</form>
       </div>
+    </div>
   </body>
 </html>

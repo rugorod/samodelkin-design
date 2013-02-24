@@ -116,29 +116,91 @@ Handlebars.registerHelper('attachNames', function(items) {
 	    this.redirect("#/");
         });
 
-	this.get("#/category/:category", function() {
+	this.get("#!/category/:category/tag/:tag/page/:page", function() {
 	    var context = this;
 	    var category = this.params['category'];
-            var link = "/json/category";
-            if (this.params['sort']) {
-                link = "/json/categorycost"
-            }
+        var link = "/json/category";
+        if (this.params['sort']) {
+            link = "/json/categorycost"
+        }
+        var page = parseInt(this.params['page'], 10);
+        var tag  = this.params['tag'];
+        var nextPage = page + 1;
+        var prevPage = false;
 
-            $('#main').empty();
-            $('#premain').empty();
-            this.load("/json/categories", {"json":true})
-		.then(function(categories) {
-                    var cat = {};
-                    for (i in categories) {
-                        if (categories[i].catName == category) {
-                            cat = categories[i];
-                        }
+        if (tag != "*") {
+            link = "/json/categorytag"
+        }
+        if (page > 0) {
+            prevPage = page - 1;
+        }
+
+//        $('#main').empty();
+//        $('#premain').empty();
+        this.load("/json/categories", {"json":true})
+		    .then(function(categories) {
+                var cat = {};
+                for (i in categories) {
+                    if (categories[i].catName == category) {
+                        cat = categories[i];
                     }
-                    this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
-                        .then(function(tags) {
-	                    this.load(link + '?category=' + encodeURIComponent(category), {"json":true})
-		                .then(function(items) {
-		                    $("#main").fadeIn('fast', function() {
+                }
+                this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
+                    .then(function(tags) {
+	                    this.load(link + '?category=' + encodeURIComponent(category) + "&page=" + page + "&tag=" + tag, {"json":true})
+		                    .then(function(items) {
+		                        $("#main").fadeIn('fast', function() {
+                                    if (items.length < 20) {
+                                        nextPage = false;
+                                    }
+                                    context.render('templates/category.mustache',
+                                                   {"items":items,
+                                                    "tags":tags,
+                                                    "catTitle":cat.catTitle,
+                                                    "catId":cat.catId,
+                                                    "catContent":cat.catContent,
+                                                    "catName":category,
+                                                    "tag" : tag,
+                                                    "nextPage" : nextPage,
+                                                    "prevPage" : prevPage})
+			                            .replace('#main')
+			                            .then(function () {
+				                           // $("#main").fadeOut('fast').fadeIn('fast');
+	                                        $('.nav li').removeClass('active');
+				                            $('#cat_' + category).addClass('active');
+                                            checkLoggedIn();
+	                                    });
+		                        });
+	                        });
+                    });
+	        });
+    });
+
+
+	this.get("#!/categorytag/:category/:tag", function() {
+	    var context = this;
+	    var category = this.params['category'];
+	    var tag = this.params['tag'];
+        var link = "/json/categorytag";
+        if (this.params['sort']) {
+            link = "/json/categorytag"
+        }
+
+        $('#main').empty();
+        $('#premain').empty();
+        this.load("/json/categories", {"json":true})
+		    .then(function(categories) {
+                var cat = {};
+                for (i in categories) {
+                    if (categories[i].catName == category) {
+                        cat = categories[i];
+                    }
+                }
+                this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
+                    .then(function(tags) {
+	                    this.load(link + '?category=' + encodeURIComponent(category) + "&tag=" + tag, {"json":true})
+		                    .then(function(items) {
+		                        $("#main").fadeIn('fast', function() {
                                         context.render('templates/category.mustache',
                                                        {"items":items,
                                                         "tags":tags,
@@ -161,51 +223,7 @@ Handlebars.registerHelper('attachNames', function(items) {
 	        });
         });
 
-	this.get("#/categorytag/:category/:tag", function() {
-	    var context = this;
-	    var category = this.params['category'];
-	    var tag = this.params['tag'];
-            var link = "/json/categorytag";
-            if (this.params['sort']) {
-                link = "/json/categorytag";
-            }
-            $('#main').empty();
-            $('#premain').empty();
-            this.load("/json/categories", {"json":true})
-		.then(function(categories) {
-                    var cat = {};
-                    for (i in categories) {
-                        if (categories[i].catName == category) {
-                            cat = categories[i];
-                        }
-                    }
-                    this.load('/json/tagscategory?category=' + encodeURIComponent(category), {"json":true})
-                        .then(function(tags) {
-	                    this.load(link + '?category=' + encodeURIComponent(category)
-                                      + "&tag=" + encodeURIComponent(tag), {"json":true})
-		                .then(function(items) {
-		                    $("#main").fadeIn('fast', function() {
-                                        context.render('templates/category.mustache',
-                                                       {"items":items,
-                                                        "tags":tags,
-                                                        "catTitle":cat.catTitle,
-                                                        "tags":tags,
-                                                        "catId":cat.catId,
-                                                        "catContent":cat.catContent,
-                                                        "catName":category})
-			                    .replace('#main')
-			                    .then(function () {
-				                $("#main").fadeIn('fast');
-	                                        $('.nav li').removeClass('active');
-				                $('#cat_' + category).addClass('active');
-                                                checkLoggedIn();
-	                                    });
-		                    });
-	                        });
-                        });
 
-	        });
-	});
 
 	this.around(function(callback) {
 	    var context = this;
@@ -219,26 +237,39 @@ Handlebars.registerHelper('attachNames', function(items) {
 	 });
 
 
-        this.get("#/editpage/:id", function() {
-	    var id = this.params['id'];
+        this.get("#!/editpage/:id", function() {
+	        var id = this.params['id'];
             var context = this;
             $('#premain').empty();
 
             this.contentId = id;
             this.load("/json/rawcontent?id=" + id, {"json":true})
-		.then(function(items) {
-		    $("#main").fadeOut('fast', function() {
-			context.render('templates/edit_content.mustache',items)
-			       .replace('#main');
-			$("#main").fadeIn(500);
-		    });
-		});
+		        .then(function(items) {
+		            $("#main").fadeOut('fast', function() {
+			            context.render('templates/edit_content.mustache',items)
+			                .replace('#main');
+			            $("#main").fadeIn(500);
+		            });
+		        });
         });
-	this.post("#/editpage/:id", function() {
-	    $.post("/json/editcontent", this.params, function(response) {
-                //             context.next(JSON.parse(response));
+
+	    this.post("#!/editpage/:id", function() {
+
+            var page = this.params['id'];
+            var context = this;
+            $("#editPageForm").ajaxSubmit({
+                url: '/json/editcontent',
+                success: function() {
+                    context.trigger('flash', "Записи добавлены.");
+                    context.redirect("#!/page/" + page);
+                    app.runRoute("get", "#!/page/" + page);
+                }
             });
-	    this.redirect("#/");
+
+	        // $.post("/json/editcontent", this.params, function(response) {
+            //     //             context.next(JSON.parse(response));
+            // });
+	        this.redirect("#/");
 	});
 
 	this.get("#/deleteitem/:category/:id", function() {
@@ -247,7 +278,7 @@ Handlebars.registerHelper('attachNames', function(items) {
             var id = this.params['id'];
 	    $.post("/json/delitem", {"id": id}, function(response) {
                 if (response == "ok") {
-                    context.redirect("#/category/" + cat);
+                    context.redirect("#!/category/" + cat);
                 }
                 //history.back();
                 //context.next(JSON.parse(response));
@@ -311,53 +342,53 @@ Handlebars.registerHelper('attachNames', function(items) {
                 //             context.next(JSON.parse(response));
             });
         });
-	this.post("#/edit", function() {
+
+	    this.post("#/edit", function() {
             var context = this;
-	    $.post("/json/edit", this.params, function(response) {
+	        $.post("/json/edit", this.params, function(response) {
                 context.trigger('flash', "Запись обновлена...");
                 app.runRoute("get", "#/edit/" + context.params['id']);
                 //             context.next(JSON.parse(response));
             });
-//	    this.redirect("#/");
-	});
+            //	    this.redirect("#/");
+	    });
 
         this.get("#/edit_category/:id", function() {
-	    var id = this.params['id'];
+	        var id = this.params['id'];
             var context = this;
             $('#premain').empty();
             this.load("/json/getcategory?id=" + id, {"json":true})
-		.then(function(items) {
-		    $("#main").fadeIn('fast', function() {
-			context.render('templates/edit_cat.mustache',items)
-			       .replace('#main');
-			$("#main").fadeIn(500);
-		    });
-		});
-	    this.render('templates/edit_cat.mustache',cat)
-		.replace('#main');
+		        .then(function(items) {
+		            $("#main").fadeIn('fast', function() {
+			            context.render('templates/edit_cat.mustache',items)
+			                .replace('#main');
+			            $("#main").fadeIn(500);
+		            });
+		        });
+	        this.render('templates/edit_cat.mustache',cat)
+		        .replace('#main');
         });
 
-	this.post("#/edit_category/", function() {
+	    this.post("#!/edit_category/", function() {
             var context = this;
-	    $.post("/json/editcategory", this.params, function(response) {
+	        $.post("/json/editcategory", context.params, function(response) {
+
                 if (response == "ok") {
                     context.trigger('update-categories');
                     context.redirect("#/category/" + context.params['catName']);
                 }
+            });
+	    });
 
-//             context.next(JSON.parse(response));
-           });
-	});
-
-        this.get("#/search", function () {
+        this.get("#!/search", function () {
             var str = this.params['str'];
             var context = this;
             $('#premain').empty();
             // FIXME: maybe race condition
             this.load("/json/searchitem?str=" + str, {"json":true})
-		.then(function(items) {
+		        .then(function(items) {
                     var cat = {};
-	            var categories = cache.get("categories");
+	                var categories = cache.get("categories");
                     for (j in items) {
                         for (i in categories) {
                             if (categories[i].catName == items[j].category) {
@@ -365,12 +396,12 @@ Handlebars.registerHelper('attachNames', function(items) {
                             }
                         }
                     }
-		    $("#main").fadeOut('fast', function() {
-			context.renderEach('templates/search_item.mustache',items)
-			       .replace('#main');
-			$("#main").fadeIn(500);
-		    });
-		});
+		            $("#main").fadeOut('fast', function() {
+			            context.renderEach('templates/search_item.mustache',items)
+			                .replace('#main');
+			            $("#main").fadeIn(500);
+		            });
+		        });
         });
 
 	this.get("#/logout", function() {
@@ -397,90 +428,32 @@ Handlebars.registerHelper('attachNames', function(items) {
 //////////////////////////////////
 // STATIC
 /////////////////////////////////
-	this.get("#/discount", function() {
-            $('#premain').empty();
-	    $('#menu_discount').addClass('active');
-            this.render('templates/main.mustache', {"contentId":"discount"})
-                .replace("#main");
-	    this.load("/json/content?id=discount", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
-                    checkLoggedIn();
-	        });
-	});
-
-	this.get("#/deliver", function() {
-            $('#premain').empty();
-	    $('#menu_deliver').addClass('active');
-            this.render('templates/main.mustache', {"contentId":"deliver"})
-                .replace("#main");
-	    this.load("/json/content?id=deliver", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
-                    checkLoggedIn();
-	        });
-	});
-
-	this.get("#/contacts", function() {
-            $('#premain').empty();
-	    $('#menu_contacts').addClass('active');
-            this.render('templates/main.mustache', {"contentId":"contacts"})
-                .replace("#main");
-	    this.load("/json/content?id=contacts", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
-                    checkLoggedIn();
-	        });
-	});
-
-	this.get("#/address", function() {
-            $('#premain').empty();
-	    $('#menu_address').addClass('active');
-            this.render('templates/main.mustache', {"contentId":"address"})
-                .replace("#main");
-	    this.load("/json/content?id=address", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
-                    checkLoggedIn();
-	        });
-        });
-
-	this.get("#/page/:page", function() {
+	    this.get("#!/page/:page", function() {
             var page = this.params['page'];
             $('#premain').empty();
-	    $('#menu_' + page).addClass('active');
-	    this.load("/json/content?id=" + page, {"json":true})
-                .then(function(items) {
-                    if (items == null)
-                    {
-                        this.render('templates/main.mustache', {"contentId":page})
-                            .replace("#main")
-		            .then(function () {
-                                checkLoggedIn();
-	                    });
-
-                    } else {
-		        this.render('templates/main.mustache',items)
-		            .replace('#main')
-		            .then(function () {
-                                checkLoggedIn();
-	                    });
+	        $('#menu_' + page).addClass('active');
+            this.render('templates/main.mustache', {"contentId":page})
+                .replace("#main");
+	        this.load("/json/content?id=" + page, {"json":true})
+                .then(function(data) {
+                    if (!data) {
+                        data = {"contentId" : page};
                     }
+		            this.render('templates/main.mustache',data)
+		                .replace('#main')
+		                .then(function () {
+                            checkLoggedIn();
+	                    });
                 });
-
-        });
+	    });
 
         this.get("#/additem", function() {
             var context = this;
 
             $('#premain').empty();
             this.trigger('update-catregories');
-	    this.render('templates/additem.template')
-		.replace('#main');
+	        this.render('templates/additem.template')
+		        .replace('#main');
             // FIXME: update trigger before render
         });
 
@@ -492,6 +465,20 @@ Handlebars.registerHelper('attachNames', function(items) {
                 url: '/json/additem',
                 success: function() {
                     context.trigger('flash', "Запись добавлена.");
+                    context.redirect("#/category/" + category);
+                    app.runRoute("get", "#/category/" + category);
+                }
+            });
+        });
+
+        this.post("/json/addcsv", function(){
+            var context = this;
+            var category = this.params.category;
+
+            $("#addcsvform").ajaxSubmit({
+                url: '/json/addcsv',
+                success: function() {
+                    context.trigger('flash', "Записи добавлены.");
                     context.redirect("#/category/" + category);
                     app.runRoute("get", "#/category/" + category);
                 }
@@ -512,7 +499,7 @@ Handlebars.registerHelper('attachNames', function(items) {
             });
         });
 
-        this.get("#/feedbacks", function() {
+        this.get("#!/feedbacks", function() {
             var context = this;
             $('#premain').empty();
 
@@ -532,6 +519,7 @@ Handlebars.registerHelper('attachNames', function(items) {
         this.post("#/addcat", function() {
             var context = this;
             var categories = cache.get("categories");
+
 
             for (i in categories) {
                 if (categories[i].catName == this.params.catName) {
@@ -662,23 +650,23 @@ Handlebars.registerHelper('attachNames', function(items) {
 	});
 
 
-        this.get("", function() {
-	    $('#menu_main').addClass('active');
+        this.get("#!/", function() {
+	        $('#menu_main').addClass('active');
 
             $('#premain').empty();
-	    this.trigger('update-categories');
+	        this.trigger('update-categories');
 
             var context = this;
             this.id = "main";
             this.contentId = "main";
             this.render('templates/main.mustache', {"contentId":"main"})
                 .replace("#main");
-	    this.load("/json/content?id=main", {"json":true})
-		.render('templates/main.mustache')
-		.replace('#main')
-		.then(function () {
+	        this.load("/json/content?id=main", {"json":true})
+		        .render('templates/main.mustache')
+		        .replace('#main')
+		        .then(function () {
                     checkLoggedIn();
-	        });
+	            });
         });
 
 
@@ -698,13 +686,22 @@ Handlebars.registerHelper('attachNames', function(items) {
 
 	this.bind('update-categories', function() {
 	    var context = this;
+
+
+
+
 	    // Display categories
 	    this.load('/json/categories', {"json":true})
-		.then(function(items) {
-		    cache.set("categories", items);
-		    this.renderEach('templates/categories.template',items)
-			.replace('#categories');
-		});
+		    .then(function(items) {
+		        cache.set("categories", items);
+                var grouped = _.chain(items)
+                    .groupBy('catTags')
+                    .map(function(cat,key){ return {subCat: key, cats : cat }})
+                    .value();
+
+		        this.render('templates/categories.mustache', {maincats : grouped})
+			        .replace('#categories');
+		    });
 	});
 
         this.bind('update-requests', function() {
@@ -754,6 +751,6 @@ Handlebars.registerHelper('attachNames', function(items) {
 
 
     $(function() {
-        app.run('#/')
+        app.run('#!/')
     });
 })(jQuery);
